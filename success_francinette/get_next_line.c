@@ -6,7 +6,7 @@
 /*   By: anqabbal <anqabbal@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/11 08:55:00 by anqabbal          #+#    #+#             */
-/*   Updated: 2023/12/22 13:06:34 by anqabbal         ###   ########.fr       */
+/*   Updated: 2023/12/22 21:47:20 by anqabbal         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,18 +78,17 @@ char *cut_buffer(char *buffer, int indice)
 	while (b--)
 	{
 		str = ft_calloc((count_line(buffer, indice) + 2), sizeof(char));
-		if (!(str))
+		if (!str)
 			return (0);
 		if (indice == 0)
 			ft_memcpy(str, buffer, count_line(buffer, indice));
 		else if (indice == 1)
 			ft_memcpy(str, buffer + count_line(buffer, 0), count_line(buffer, indice));
-		else
-			ft_memcpy(str, buffer + count_line(buffer, 0), count_line(buffer, 3));
 	}
 	if (str && str[0] == '\0')
 	{
 		free (str);
+		str = NULL;
 		return (0);
 	}
 	return (str);
@@ -103,7 +102,7 @@ char	*read_the_line(char **old_buffer, int fd, ssize_t *n)
 
 	*n = BUFFER_SIZE;
 	str1 = *old_buffer;
-	buffer = ft_calloc(BUFFER_SIZE + 1 , sizeof(char));
+	buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
 	if (!(buffer))
 		return (0);
 	while(*n == BUFFER_SIZE && *n)
@@ -116,7 +115,7 @@ char	*read_the_line(char **old_buffer, int fd, ssize_t *n)
 		if (ft_strchr(buffer, '\n'))
 			break;
 	 }
-	if (*n)
+	if (ft_strchr(buffer, '\n'))
 		*old_buffer = cut_buffer(buffer, 1);
 	else
 		*old_buffer = NULL;
@@ -136,7 +135,11 @@ char *get_next_line(int fd)
 	read_ = NULL;
 	n = 0;
 	if (fd < 0 || BUFFER_SIZE == 0 || read(fd, 0, 0) < 0)
+	{
+		free(old_buffer);
+		old_buffer = NULL;
 		return (NULL);
+	}
 	if (ft_strchr(old_buffer, '\n'))
 	{
 		old = cut_buffer(old_buffer, 0);
@@ -148,10 +151,12 @@ char *get_next_line(int fd)
 	else
 	{
 		read_ = read_the_line(&old_buffer, fd, &n);
-		// if (!n)
-		// 	old = NULL;
 		old = old_buffer;
 		line = read_;
 	}
 	return (line);
 }
+
+
+
+//when I work with normal calloc I get some ko in normal test of francinette
